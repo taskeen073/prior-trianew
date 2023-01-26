@@ -2,13 +2,14 @@ package th.co.prior.demo4.service;
 
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import th.co.prior.demo4.component.OrderUtilComponent;
-import th.co.prior.demo4.model.OrderInquiryRequestModel;
-import th.co.prior.demo4.model.OrderInquiryResponseModel;
-import th.co.prior.demo4.model.OrderQueryResultModel;
-import th.co.prior.demo4.model.ResponseModel;
+import th.co.prior.demo4.model.*;
 import th.co.prior.demo4.repository.OrderRepository;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 @Service
@@ -46,4 +47,92 @@ public class OrderService {
 
 
 
+
+    public ResponseModel<Void>  insertNewBill(BillModel billModel){
+        ResponseModel<Void> result = new ResponseModel<>();
+
+        result.setStatusCode(201);
+        result.setDescription("ok");
+        try {
+            // do some business
+            this.insertTableBill(billModel);
+
+//            insert billOrder
+//
+        } catch (Exception e){
+            e.printStackTrace();
+            result.setStatusCode(500);
+            result.setDescription(e.getMessage());
+        }
+        return result;
+    }
+
+    @Transactional(rollbackFor = SQLException.class, propagation = Propagation.REQUIRES_NEW)
+    public BillModel insertTableBill(BillModel billModel) throws IOException {
+
+        int tableBillId = this.orderRepository.insertTableBill(billModel);
+
+        //            insert billOrder
+        BillModel x = new BillModel();
+        x.setBillTable(tableBillId);
+        x.setBillStatus("NEW");
+        x.setBillWaiter(tableBillId);
+//        int billOrderId = this.orderBillNativeRepository.insertBillOrder(billOrderEntity);
+
+    return x;
+    }
+
+
+    public ResponseModel<Integer> updateOrderStatus(OrderInquiryRequestModel orderInquiryRequestModel) {
+        ResponseModel<Integer> result = new ResponseModel();
+
+        result.setStatusCode(201);
+        result.setDescription("ok");
+
+        try {
+            Integer dataResponse = this.orderRepository.updateOrderStatus(orderInquiryRequestModel);
+            result.setData(dataResponse);
+            result.setDescription("SUCCESS");
+            result.setStatusCode(200);
+        } catch (Exception e){
+            result.setStatusCode(500);
+            result.setDescription(e.getMessage());
+        }
+        return  result;
+    }
+
+    public ResponseModel<Void> insertNewOrder(OrderInquiryRequestModel orderInquiryRequestModel) {
+        ResponseModel<Void> result = new ResponseModel<>();
+
+        result.setStatusCode(201);
+        result.setDescription("ok");
+        try {
+            // do some business
+            this.insertTableOrder(orderInquiryRequestModel);
+
+//            insert billOrder
+//
+        } catch (Exception e){
+            e.printStackTrace();
+            result.setStatusCode(500);
+            result.setDescription(e.getMessage());
+        }
+        return result;
+
+    }
+
+    @Transactional(rollbackFor = SQLException.class, propagation = Propagation.REQUIRES_NEW)
+    public void insertTableOrder(OrderInquiryRequestModel orderInquiryRequestModel) {
+
+        int orderTableId = this.orderRepository.insertTableOrder(orderInquiryRequestModel);
+
+        //            insert billOrder
+        OrderInsertRequestModel x = new OrderInsertRequestModel();
+        x.setOrderMenu(orderTableId);
+        x.setOrderStatus("NEW");
+//        x.setBillWaiter(tableBillId);
+//        int billOrderId = this.orderBillNativeRepository.insertBillOrder(billOrderEntity);
+
+//        return x;
+    }
 }

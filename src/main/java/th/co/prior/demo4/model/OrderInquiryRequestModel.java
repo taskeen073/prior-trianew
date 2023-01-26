@@ -4,8 +4,7 @@ import lombok.Data;
 
 @Data
 public class OrderInquiryRequestModel {
-    private Integer status;
-    private String description;
+ private Integer orderId;
     private Integer orderMenu;
     private Integer orderValue;
     private Integer orderBill;
