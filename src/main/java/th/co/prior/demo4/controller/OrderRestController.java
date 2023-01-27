@@ -26,6 +26,7 @@ public class OrderRestController {
             HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse){
         return this.orderService.getOrderByCriteria(orderInquiryRequestModel);
     }
+
     @PostMapping("/insert/bill")
     public ResponseModel<Void> createTableBill(@RequestBody BillModel billModel){
         return this.orderService.insertNewBill(billModel);

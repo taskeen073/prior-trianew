@@ -31,16 +31,17 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Override
     public List<OrderQueryResultModel> fetchOrderByCriteris(OrderInquiryRequestModel orderInquiryRequestModel) {
         List<Object>params=new ArrayList<>();
-//        StringBuilder sb = new StringBuilder();
-//        sb.append("SELECT * FROM employees.order where 1=1");
+
         String sb="SELECT * FROM employees.order where 1=1";
 
         if(!StringUtils.isEmpty(orderInquiryRequestModel.getOrderStatus())) {
             sb += " and order_status = ? ";
             params.add(orderInquiryRequestModel.getOrderStatus());
         }
-//        sb += " order by order_id desc ";
-//        order_bill,order_menu,order_status,order_value
+        if(!StringUtils.isEmpty(orderInquiryRequestModel.getOrderMenu())) {
+            sb += " and order_menu = ? ";
+            params.add(orderInquiryRequestModel.getOrderMenu());
+        }
         List<OrderQueryResultModel> result= this.jdbcTemplate.query(sb.toString(),
                 new RowMapper<OrderQueryResultModel>() {
             @Override
@@ -56,7 +57,6 @@ public class OrderRepositoryImpl implements OrderRepository {
         }, params.toArray());
         return result;
     }
-
 
     @Override
     public List<BillModel> getOrderByChef(RequestByChefModel requestByChefModel) {
@@ -109,6 +109,31 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
 
+    @Override
+    public int insertTableOrder(OrderInquiryRequestModel orderInquiryRequestModel) {
+        List<Object> paramList1 = new ArrayList<>();
+
+        StringBuilder sb1 = new StringBuilder();
+        sb1.append("INSERT INTO employees.order   ");
+        sb1.append("  (order_status, order_bill, order_menu, order_value) ");
+        sb1.append("  VALUES  ");
+        sb1.append("  (?, ?, ?, ?)  ");
+        paramList1.add(orderInquiryRequestModel.getOrderStatus());
+        paramList1.add(orderInquiryRequestModel.getOrderBill());
+        paramList1.add(orderInquiryRequestModel.getOrderMenu());
+        paramList1.add(orderInquiryRequestModel.getOrderValue());
+
+
+        GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
+
+        int insertedRow1 = this.jdbcTemplate.update(
+                con -> this.prepareForInsertTableBill(sb1.toString(), con, paramList1)
+                , generatedKeyHolder);
+        log.info("insertTableBill affect {} row", insertedRow1);
+
+        return generatedKeyHolder.getKey().intValue();
+    }
+
 
     private PreparedStatement prepareForInsertTableBill(String sql, Connection connection, List<Object> paramList) throws SQLException {
         PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -156,28 +181,5 @@ public class OrderRepositoryImpl implements OrderRepository {
         return updatedRow;
     }
 
-    @Override
-    public int insertTableOrder(OrderInquiryRequestModel orderInquiryRequestModel) {
-        List<Object> paramList1 = new ArrayList<>();
 
-        StringBuilder sb1 = new StringBuilder();
-        sb1.append("INSERT INTO employees.order   ");
-        sb1.append("  (order_status, order_bill, order_menu, order_value) ");
-        sb1.append("  VALUES  ");
-        sb1.append("  (?, ?, ?, ?)  ");
-        paramList1.add(orderInquiryRequestModel.getOrderStatus());
-        paramList1.add(orderInquiryRequestModel.getOrderBill());
-        paramList1.add(orderInquiryRequestModel.getOrderMenu());
-        paramList1.add(orderInquiryRequestModel.getOrderValue());
-
-
-        GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
-
-        int insertedRow1 = this.jdbcTemplate.update(
-                con -> this.prepareForInsertTableBill(sb1.toString(), con, paramList1)
-                , generatedKeyHolder);
-        log.info("insertTableBill affect {} row", insertedRow1);
-
-        return generatedKeyHolder.getKey().intValue();
-    }
 }

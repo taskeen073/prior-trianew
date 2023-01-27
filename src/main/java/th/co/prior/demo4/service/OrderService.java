@@ -45,20 +45,14 @@ public class OrderService {
     return result;
     }
 
-
-
-
     public ResponseModel<Void>  insertNewBill(BillModel billModel){
         ResponseModel<Void> result = new ResponseModel<>();
 
         result.setStatusCode(201);
         result.setDescription("ok");
         try {
-            // do some business
             this.insertTableBill(billModel);
 
-//            insert billOrder
-//
         } catch (Exception e){
             e.printStackTrace();
             result.setStatusCode(500);
@@ -72,12 +66,10 @@ public class OrderService {
 
         int tableBillId = this.orderRepository.insertTableBill(billModel);
 
-        //            insert billOrder
         BillModel x = new BillModel();
         x.setBillTable(tableBillId);
         x.setBillStatus("NEW");
         x.setBillWaiter(tableBillId);
-//        int billOrderId = this.orderBillNativeRepository.insertBillOrder(billOrderEntity);
 
     return x;
     }
@@ -126,13 +118,11 @@ public class OrderService {
 
         int orderTableId = this.orderRepository.insertTableOrder(orderInquiryRequestModel);
 
-        //            insert billOrder
         OrderInsertRequestModel x = new OrderInsertRequestModel();
         x.setOrderMenu(orderTableId);
         x.setOrderStatus("NEW");
-//        x.setBillWaiter(tableBillId);
-//        int billOrderId = this.orderBillNativeRepository.insertBillOrder(billOrderEntity);
 
-//        return x;
     }
+
+
 }
