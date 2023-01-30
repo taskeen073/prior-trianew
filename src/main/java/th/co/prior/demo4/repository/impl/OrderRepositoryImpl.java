@@ -58,31 +58,8 @@ public class OrderRepositoryImpl implements OrderRepository {
         return result;
     }
 
-    @Override
-    public List<BillModel> getOrderByChef(RequestByChefModel requestByChefModel) {
-        List<Object> paramList = new ArrayList<>();
-        String sql = "SELECT * FROM employees.order where 1=1";
-        if(!StringUtils.isEmpty(requestByChefModel.getOrderStatus())) {
-            sql += " and status = ? ";
-            paramList.add(requestByChefModel.getOrderStatus());
-        }
 
 
-        List<BillModel> result = this.jdbcTemplate.query(sql, new RowMapper<BillModel>() {
-            @Override
-            public BillModel mapRow(ResultSet rs, int rowNum) throws SQLException {
-                BillModel x = new BillModel();
-
-                x.setBillId(rs.getInt("bill_no"));
-                x.setBillTable(rs.getInt("bill_table"));
-                x.setBillWaiter(rs.getInt("bill_waiter"));
-                x.setBillStatus(rs.getString("bill_status"));
-                x.setBillPriceAll(rs.getInt("bill_price_all"));
-                return x;
-            }
-        },paramList.toArray());
-        return result;
-    }
 
     @Override
     public int insertTableBill(BillModel billModel) {

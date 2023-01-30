@@ -7,7 +7,6 @@ import java.util.List;
 
 public interface OrderRepository {
      List<OrderQueryResultModel> fetchOrderByCriteris(OrderInquiryRequestModel orderInquiryRequestModel);
-     List<BillModel> getOrderByChef(RequestByChefModel requestByChefModel);
      public int insertTableBill(BillModel billModel);
 
 
