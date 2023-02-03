@@ -7,10 +7,10 @@ import java.util.List;
 
 public interface OrderRepository {
      List<OrderQueryResultModel> fetchOrderByCriteris(OrderInquiryRequestModel orderInquiryRequestModel);
-     public int insertTableBill(BillModel billModel);
+     int insertTableBill(BillModel billModel);
 
 
-     Integer updateOrderStatus(OrderInquiryRequestModel orderInquiryRequestModel);
+     int updateOrderStatus(OrderInquiryRequestModel orderInquiryRequestModel);
 
-     int insertTableOrder(OrderInquiryRequestModel orderInquiryRequestModel);
+     int  insertTableOrder(OrderInquiryRequestModel orderInquiryRequestModel);
 }

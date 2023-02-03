@@ -32,7 +32,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     public List<OrderQueryResultModel> fetchOrderByCriteris(OrderInquiryRequestModel orderInquiryRequestModel) {
         List<Object>params=new ArrayList<>();
 
-        String sb="SELECT * FROM employees.order where 1=1";
+        String sb="SELECT * FROM restaurant.order where 1=1";
 
         if(!StringUtils.isEmpty(orderInquiryRequestModel.getOrderStatus())) {
             sb += " and order_status = ? ";
@@ -67,7 +67,7 @@ public class OrderRepositoryImpl implements OrderRepository {
         List<Object> paramList = new ArrayList<>();
 
         StringBuilder sb = new StringBuilder();
-        sb.append("  insert into bill  ");
+        sb.append("  insert into restaurant.bill  ");
         sb.append("  ( bill_table, bill_status, bill_waiter)   ");
         sb.append("  values   ");
         sb.append("  (?, ?, ?)  ");
@@ -91,7 +91,7 @@ public class OrderRepositoryImpl implements OrderRepository {
         List<Object> paramList1 = new ArrayList<>();
 
         StringBuilder sb1 = new StringBuilder();
-        sb1.append("INSERT INTO employees.order   ");
+        sb1.append("INSERT INTO restaurant.order   ");
         sb1.append("  (order_status, order_bill, order_menu, order_value) ");
         sb1.append("  VALUES  ");
         sb1.append("  (?, ?, ?, ?)  ");
@@ -102,11 +102,10 @@ public class OrderRepositoryImpl implements OrderRepository {
 
 
         GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
-
         int insertedRow1 = this.jdbcTemplate.update(
                 con -> this.prepareForInsertTableBill(sb1.toString(), con, paramList1)
                 , generatedKeyHolder);
-        log.info("insertTableBill affect {} row", insertedRow1);
+        log.info(" {} row  ", generatedKeyHolder);
 
         return generatedKeyHolder.getKey().intValue();
     }
@@ -124,10 +123,10 @@ public class OrderRepositoryImpl implements OrderRepository {
 
 
     @Override
-    public Integer updateOrderStatus(OrderInquiryRequestModel orderInquiryRequestModel) {
+    public  int updateOrderStatus(OrderInquiryRequestModel orderInquiryRequestModel) {
         List<Object> paramList = new ArrayList<>();
 
-        String sql = " UPDATE employees.order SET ";
+        String sql = " UPDATE restaurant.order SET ";
         StringJoiner stringJoiner = new StringJoiner(",");
 
         if(!StringUtils.isEmpty(orderInquiryRequestModel.getOrderStatus())){

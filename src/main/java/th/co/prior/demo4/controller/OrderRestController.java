@@ -38,8 +38,7 @@ public class OrderRestController {
     }
     @PostMapping("/update/oder/status")
     public ResponseModel<Integer> updateOrderStatus(
-            @RequestBody OrderInquiryRequestModel orderInquiryRequestModel
-    ){
+            @RequestBody OrderInquiryRequestModel orderInquiryRequestModel){
         return this.orderService.updateOrderStatus(orderInquiryRequestModel);
     }
 

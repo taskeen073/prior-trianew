@@ -1,9 +1,15 @@
 package th.co.prior.demo4.service;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.Registration;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import th.co.prior.demo4.component.KafkaProducerComponent;
 import th.co.prior.demo4.component.OrderUtilComponent;
 import th.co.prior.demo4.model.*;
 import th.co.prior.demo4.repository.OrderRepository;
@@ -12,14 +18,22 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
+@Slf4j
 @Service
 public class OrderService {
     private OrderRepository orderRepository;
     private OrderUtilComponent orderUtilComponent;
+    private KafkaProducerComponent kafkaProducerComponent;
 
-    public OrderService(OrderRepository orderRepository, OrderUtilComponent orderUtilComponent) {
+    @Value("${kafka.topics.regist.get.order}")
+    private String kafkaGetOrderWaiterToKitchener ;
+    @Value("${kafka.topics.regist.update.order}")
+    private String kafkaUpdateKitchenerToWaiter ;
+
+    public OrderService(OrderRepository orderRepository, OrderUtilComponent orderUtilComponent,KafkaProducerComponent kafkaProducerComponent) {
         this.orderRepository = orderRepository;
         this.orderUtilComponent = orderUtilComponent;
+        this.kafkaProducerComponent =kafkaProducerComponent;
     }
 
     public ResponseModel<List<OrderInquiryResponseModel>> getOrderByCriteria(OrderInquiryRequestModel orderInquiryRequestModel) {
@@ -36,6 +50,7 @@ public class OrderService {
 
         List<OrderInquiryResponseModel> dataList = this.orderUtilComponent.transformQueryResultToResponseModel(queryResult);
 //        Result
+
         result.setData(dataList);
     } catch (Exception e){
         result.setStatusCode(500);
@@ -47,11 +62,11 @@ public class OrderService {
 
     public ResponseModel<Void>  insertNewBill(BillModel billModel){
         ResponseModel<Void> result = new ResponseModel<>();
-
         result.setStatusCode(201);
         result.setDescription("ok");
         try {
             this.insertTableBill(billModel);
+            //queForWaiterToKitchener
 
         } catch (Exception e){
             e.printStackTrace();
@@ -60,23 +75,21 @@ public class OrderService {
         }
         return result;
     }
+    private String objectToJsonString(Object model) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(model);
+    }
 
     @Transactional(rollbackFor = SQLException.class, propagation = Propagation.REQUIRES_NEW)
-    public BillModel insertTableBill(BillModel billModel) throws IOException {
+    public void insertTableBill(BillModel billModel) throws IOException {
 
-        int tableBillId = this.orderRepository.insertTableBill(billModel);
+         this.orderRepository.insertTableBill(billModel);
 
-        BillModel x = new BillModel();
-        x.setBillTable(tableBillId);
-        x.setBillStatus("NEW");
-        x.setBillWaiter(tableBillId);
-
-    return x;
     }
 
 
     public ResponseModel<Integer> updateOrderStatus(OrderInquiryRequestModel orderInquiryRequestModel) {
-        ResponseModel<Integer> result = new ResponseModel();
+        ResponseModel<Integer> result = new ResponseModel<>();
 
         result.setStatusCode(201);
         result.setDescription("ok");
@@ -86,6 +99,9 @@ public class OrderService {
             result.setData(dataResponse);
             result.setDescription("SUCCESS");
             result.setStatusCode(200);
+            String message = this.objectToJsonString(orderInquiryRequestModel);
+            this.kafkaProducerComponent.senData(message,this.kafkaUpdateKitchenerToWaiter);
+
         } catch (Exception e){
             result.setStatusCode(500);
             result.setDescription(e.getMessage());
@@ -103,6 +119,11 @@ public class OrderService {
             this.insertTableOrder(orderInquiryRequestModel);
 
 //            insert billOrder
+
+            String message = this.objectToJsonString(orderInquiryRequestModel);
+
+            this.kafkaProducerComponent.senData(message,kafkaGetOrderWaiterToKitchener);
+
 //
         } catch (Exception e){
             e.printStackTrace();
@@ -125,4 +146,28 @@ public class OrderService {
     }
 
 
+    public void insertOrderInfo(String message) {
+        try {
+
+            ObjectMapper mapper = new ObjectMapper();
+            OrderInquiryRequestModel x = mapper.readValue(message, OrderInquiryRequestModel.class);
+
+        }catch (Exception e){
+            e.printStackTrace();
+            log.info("insertOrderInfo error {}",e.getMessage());
+        }
+
+    }
+
+    public void updateOrderInfo(String message) {
+        try {
+
+            ObjectMapper mapper = new ObjectMapper();
+            OrderInquiryRequestModel x = mapper.readValue(message, OrderInquiryRequestModel.class);
+
+        }catch (Exception e){
+            e.printStackTrace();
+            log.info("updateOrderInfo error {}",e.getMessage());
+        }
+    }
 }
