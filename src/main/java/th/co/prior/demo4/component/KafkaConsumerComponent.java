@@ -17,12 +17,12 @@ public class KafkaConsumerComponent {
         this.orderService = orderService;
     }
 
-    @KafkaListener(topics = "${kafka.topics.regist.update.order}", groupId = "${kafka.consumer.group-id}")
+    @KafkaListener(topics = "${kafka.topics.regist.update.order}", groupId = "${kafka.consumer.group-id.update}")
     public void updateResult(@Payload String message) throws Exception {
         log.info("Kitchener say message  {}", message);
         this.orderService.updateOrderInfo(message);
    }
-    @KafkaListener(topics = "${kafka.topics.regist.get.order}", groupId = "$kafka.consumer.group-id}")
+    @KafkaListener(topics = "${kafka.topics.regist.get.order}", groupId = "${kafka.consumer.group-id.get}")
     public void getResult(@Payload String message) throws Exception {
         log.info("Waiter say message got {}", message);
         this.orderService.insertOrderInfo(message);

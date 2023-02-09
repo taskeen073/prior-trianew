@@ -118,13 +118,13 @@ public class OrderService {
             // do some business
             this.insertTableOrder(orderInquiryRequestModel);
 
-//            insert billOrder
+            // insert billOrder
 
             String message = this.objectToJsonString(orderInquiryRequestModel);
 
             this.kafkaProducerComponent.senData(message,kafkaGetOrderWaiterToKitchener);
 
-//
+
         } catch (Exception e){
             e.printStackTrace();
             result.setStatusCode(500);
@@ -156,9 +156,7 @@ public class OrderService {
             e.printStackTrace();
             log.info("insertOrderInfo error {}",e.getMessage());
         }
-
     }
-
     public void updateOrderInfo(String message) {
         try {
 
